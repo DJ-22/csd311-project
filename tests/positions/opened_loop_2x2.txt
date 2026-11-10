@@ -1,0 +1,10 @@
+# Loop of 4 with the middle-top edge drawn: the top two boxes are 3-sided and the
+# bottom two form a 2-chain opened at both ends.
+board: 2x2
+expect: chain 2,3 open=2
+---
++--+--+
+|  |  |
++  +  +
+|     |
++--+--+

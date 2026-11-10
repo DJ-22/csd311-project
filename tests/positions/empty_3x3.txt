@@ -1,0 +1,10 @@
+# Empty board: no 2-sided boxes, so no components.
+board: 3x3
+---
++  +  +  +
+
++  +  +  +
+
++  +  +  +
+
++  +  +  +

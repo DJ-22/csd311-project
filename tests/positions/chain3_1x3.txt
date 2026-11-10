@@ -1,0 +1,7 @@
+# Straight chain of 3 across a 1x3 board; both ends run to the boundary.
+board: 1x3
+expect: chain 0,1,2 open=0
+---
++--+--+--+
+
++--+--+--+

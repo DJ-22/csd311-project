@@ -1,0 +1,9 @@
+# Outer boundary of a 2x2 board drawn: the four boxes form a loop of 4.
+board: 2x2
+expect: loop 0,1,2,3 open=0
+---
++--+--+
+|     |
++  +  +
+|     |
++--+--+

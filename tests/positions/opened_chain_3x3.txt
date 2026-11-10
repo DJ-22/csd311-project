@@ -1,0 +1,13 @@
+# Top row was a 3-chain; its left box is now 3-sided, leaving a 2-chain opened at
+# one end. Box (2,0) is an isolated 1-chain ending at junctions.
+board: 3x3
+expect: chain 1,2 open=1
+expect: chain 6 open=0
+---
++--+--+--+
+|
++--+--+--+
+
++  +  +  +
+|
++--+  +  +
