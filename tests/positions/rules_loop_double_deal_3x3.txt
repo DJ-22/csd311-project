@@ -1,0 +1,19 @@
+# The opponent opened the top-left 4-loop with v(0,1): boxes 0 and 1 are
+# capturable, and 3, 4 form a 2-chain open at both ends. A 5-chain (2,5,8,7,6)
+# remains and is worth more than the 4-box sacrifice, so the player takes nothing
+# and plays the middle edge v(1,1), leaving two dominoes.
+board: 3x3
+expect: chain 3,4 open=2
+expect: chain 2,5,6,7,8 open=0
+rule: endgame_double_deal
+move: v(1,1)
+turn: v(1,1)
+gain: 0
+---
++--+--+  +
+|  |  |  |
++  +  +  +
+|     |  |
++--+--+  +
+         |
++--+--+--+

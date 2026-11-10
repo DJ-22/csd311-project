@@ -1,0 +1,18 @@
+# As rules_loop_double_deal_3x3, but only a 3-chain (2,5,8) remains. Keeping control
+# would sacrifice 4 boxes to win 3, so rule 1's exception applies: take all four
+# loop boxes, then open the 3-chain.
+board: 3x3
+expect: chain 3,4 open=2
+expect: chain 2,5,8 open=0
+rule: endgame_double_deal
+move: h(1,0)
+turn: h(1,0) h(1,1) v(1,1) h(0,2)
+gain: 4
+---
++--+--+  +
+|  |  |  |
++  +  +  +
+|     |  |
++--+--+  +
+|  |  |  |
++--+--+  +

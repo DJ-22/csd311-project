@@ -1,0 +1,18 @@
+# No safe move and nothing to capture: a vertical 2-chain (boxes 0, 3) and a
+# 7-chain snake. The cheapest sacrifice is the 2-chain, opened by its middle edge
+# h(1,0) (hard-hearted handout), not by an end edge, so the opponent cannot double-deal.
+board: 3x3
+expect: chain 0,3 open=0
+expect: chain 1,2,4,5,6,7,8 open=0
+rule: min_sacrifice
+move: h(1,0)
+turn: h(1,0)
+gain: 0
+---
++--+--+--+
+   |
++  +  +--+
+   |     |
++--+--+  +
+         |
++--+--+--+
