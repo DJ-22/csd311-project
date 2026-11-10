@@ -218,3 +218,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Generated datasets and exact tables (keep the directory)
+data/*
+!data/.gitkeep
