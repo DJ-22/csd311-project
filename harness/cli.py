@@ -16,11 +16,14 @@ from harness.tournament import DEFAULT_TIME_LIMIT, round_robin, write_csv
 from solvers.base import Player
 from solvers.baselines import GreedyPlayer, RandomPlayer
 from solvers.exact import ExactPlayer
+from solvers.mcts import MCTSPlayer
 
 PLAYERS: dict[str, Callable[[int], Player]] = {
     "random": lambda seed: RandomPlayer(seed),
     "greedy": lambda seed: GreedyPlayer(seed),
     "exact": lambda seed: ExactPlayer(seed),
+    "mcts": lambda seed: MCTSPlayer(seed=seed),
+    "mcts-flat": lambda seed: MCTSPlayer(flat=True, seed=seed),
 }
 
 
