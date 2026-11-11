@@ -1,0 +1,16 @@
+# Only the top 3-chain is left and the opponent has opened it. No other long chain
+# or loop remains, so there is no control to keep: the player takes all 3 boxes.
+board: 3x3
+expect: chain 1,2 open=1
+rule: capture
+move: v(0,1)
+turn: v(0,1) v(0,2) v(0,3)
+gain: 3
+---
++--+--+--+
+|
++--+--+--+
+|  |  |  |
++--+--+--+
+|  |  |  |
++--+--+--+
