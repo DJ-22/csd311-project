@@ -16,6 +16,7 @@ from harness.tournament import DEFAULT_TIME_LIMIT, round_robin, write_csv
 from solvers.base import Player
 from solvers.baselines import GreedyPlayer, RandomPlayer
 from solvers.exact import ExactPlayer
+from solvers.mcts import MCTSPlayer
 from solvers.rules.rules_player import RulePlayer
 from solvers.search import SearchPlayer
 
@@ -26,6 +27,8 @@ PLAYERS: dict[str, Callable[[int], Player]] = {
     "search": lambda seed: SearchPlayer(seed=seed),
     "rules": lambda seed: RulePlayer(backend="python", seed=seed),
     "rules-prolog": lambda seed: RulePlayer(backend="prolog", seed=seed),
+    "mcts": lambda seed: MCTSPlayer(seed=seed),
+    "mcts-flat": lambda seed: MCTSPlayer(flat=True, seed=seed),
 }
 
 
