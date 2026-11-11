@@ -19,6 +19,7 @@ from solvers.exact import ExactPlayer
 from solvers.mcts import MCTSPlayer
 from solvers.rules.rules_player import RulePlayer
 from solvers.search import SearchPlayer
+from solvers.tuned import tuned_player
 
 PLAYERS: dict[str, Callable[[int], Player]] = {
     "random": lambda seed: RandomPlayer(seed),
@@ -29,6 +30,10 @@ PLAYERS: dict[str, Callable[[int], Player]] = {
     "rules-prolog": lambda seed: RulePlayer(backend="prolog", seed=seed),
     "mcts": lambda seed: MCTSPlayer(seed=seed),
     "mcts-flat": lambda seed: MCTSPlayer(flat=True, seed=seed),
+    "search-ga": lambda seed: tuned_player("search-ga", seed=seed),
+    "search-hc": lambda seed: tuned_player("search-hc", seed=seed),
+    "search-sa": lambda seed: tuned_player("search-sa", seed=seed),
+    "search-tabu": lambda seed: tuned_player("search-tabu", seed=seed),
 }
 
 
