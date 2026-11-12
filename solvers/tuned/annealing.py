@@ -13,6 +13,7 @@ import random
 
 import numpy as np
 
+from engine.board import Board
 from solvers.search import DEFAULT_WEIGHTS
 from solvers.tuned.fitness import (
     DEFAULT_BOARD,
@@ -32,6 +33,7 @@ Trace = list[tuple[int, float, float]]
 
 
 def simulated_annealing(evaluator: FitnessEvaluator, budget: int, seed: int) -> tuple[np.ndarray, Trace]:
+    """Maximise fitness with simulated annealing; return ``(best_w, trace)``."""
     rng = random.Random(seed)
     n = len(DEFAULT_WEIGHTS)
     best: np.ndarray | None = None
@@ -82,7 +84,12 @@ def simulated_annealing(evaluator: FitnessEvaluator, budget: int, seed: int) -> 
     return best, trace
 
 
-def run_annealing(budget: int, seed: int, board=DEFAULT_BOARD, budget_games: int = DEFAULT_BUDGET_GAMES) -> np.ndarray:
+def run_annealing(
+    budget: int,
+    seed: int,
+    board: Board | tuple[int, int] = DEFAULT_BOARD,
+    budget_games: int = DEFAULT_BUDGET_GAMES,
+) -> np.ndarray:
     """Tune weights with simulated annealing and return the best vector found."""
     w, _ = simulated_annealing(FitnessEvaluator(board, budget_games, seed), budget, seed)
     return w

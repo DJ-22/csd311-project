@@ -13,6 +13,7 @@ from collections import deque
 
 import numpy as np
 
+from engine.board import Board
 from solvers.search import DEFAULT_WEIGHTS
 from solvers.tuned.fitness import (
     DEFAULT_BOARD,
@@ -41,6 +42,7 @@ def _neighbours(current: np.ndarray) -> list[tuple[np.ndarray, tuple[int, int]]]
 
 
 def tabu_search(evaluator: FitnessEvaluator, budget: int, seed: int) -> tuple[np.ndarray, Trace]:
+    """Maximise fitness with tabu search; return ``(best_w, trace)``."""
     if budget < 1:
         raise ValueError("budget must be >= 1")
     rng = random.Random(seed)
@@ -71,7 +73,12 @@ def tabu_search(evaluator: FitnessEvaluator, budget: int, seed: int) -> tuple[np
     return best, trace
 
 
-def run_tabu(budget: int, seed: int, board=DEFAULT_BOARD, budget_games: int = DEFAULT_BUDGET_GAMES) -> np.ndarray:
+def run_tabu(
+    budget: int,
+    seed: int,
+    board: Board | tuple[int, int] = DEFAULT_BOARD,
+    budget_games: int = DEFAULT_BUDGET_GAMES,
+) -> np.ndarray:
     """Tune weights with tabu search and return the best vector found."""
     w, _ = tabu_search(FitnessEvaluator(board, budget_games, seed), budget, seed)
     return w

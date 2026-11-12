@@ -97,11 +97,7 @@ def tuned_player(
     seed: int = 0,
     data_dir: Path | str | None = None,
 ) -> SearchPlayer:
-    """Build a ``SearchPlayer`` with the tuned weights for ``name``.
-
-    ``name`` is ``search-ga`` / ``search-hc`` / ``search-sa`` / ``search-tabu``,
-    or the bare optimiser key ``ga`` / ``hc`` / ``sa`` / ``tabu``.
-    """
+    """Build a ``SearchPlayer`` for ``name`` (``search-ga`` etc., or bare ``ga`` etc.)."""
     opt = name[len("search-"):] if name.startswith("search-") else name
     if opt not in OPTIMISERS:
         raise ValueError(f"unknown tuned player {name!r}; choose from {[PLAYER_NAMES[o] for o in OPTIMISERS]}")

@@ -11,6 +11,7 @@ import random
 
 import numpy as np
 
+from engine.board import Board
 from solvers.search import DEFAULT_WEIGHTS
 from solvers.tuned.fitness import (
     DEFAULT_BOARD,
@@ -27,6 +28,7 @@ Trace = list[tuple[int, float, float]]
 
 
 def hill_climb(evaluator: FitnessEvaluator, budget: int, seed: int) -> tuple[np.ndarray, Trace]:
+    """Maximise fitness with stochastic hill climbing; return ``(best_w, trace)``."""
     if budget < 1:
         raise ValueError("budget must be >= 1")
     rng = random.Random(seed)
@@ -57,7 +59,12 @@ def hill_climb(evaluator: FitnessEvaluator, budget: int, seed: int) -> tuple[np.
     return best, trace
 
 
-def run_hill_climb(budget: int, seed: int, board=DEFAULT_BOARD, budget_games: int = DEFAULT_BUDGET_GAMES) -> np.ndarray:
+def run_hill_climb(
+    budget: int,
+    seed: int,
+    board: Board | tuple[int, int] = DEFAULT_BOARD,
+    budget_games: int = DEFAULT_BUDGET_GAMES,
+) -> np.ndarray:
     """Tune weights with hill climbing and return the best vector found."""
     w, _ = hill_climb(FitnessEvaluator(board, budget_games, seed), budget, seed)
     return w
