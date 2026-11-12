@@ -35,7 +35,8 @@ CORES = {
     "sa": simulated_annealing,
     "tabu": tabu_search,
 }
-REEVAL_SEED_OFFSET = 100_000
+# Clear of every fitness game seed (fitness uses `seed * SEED_STRIDE + i`, stride 10_000).
+REEVAL_SEED_OFFSET = 1_000_000
 
 
 def _tune(args: argparse.Namespace) -> dict[str, np.ndarray]:

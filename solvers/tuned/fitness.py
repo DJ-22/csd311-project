@@ -1,14 +1,12 @@
-"""Solver 6: shared fitness function for tuning solver-3's weight vector.
+"""Solver 6: shared fitness for tuning solver-3's weight vector.
 
-``FitnessEvaluator`` plays ``budget_games`` games on a fixed board — half against
-``GreedyPlayer``, half against ``SearchPlayer(DEFAULT_WEIGHTS, max_depth=2)`` —
-with the tuned player's seat alternating every game, and returns::
+Plays ``budget_games`` games (half vs Greedy, half vs ``SearchPlayer`` at depth 2)
+with alternating seat, and returns::
 
     mean(win=1, draw=0.5, loss=0)  +  0.01 * mean_box_margin / num_boxes
 
-Common random numbers: game ``i`` uses seed ``seed + i`` and both players are
-seeded deterministically from it, so every weight vector is evaluated against the
-same random streams (noise reduction). Identical weight vectors are cached.
+Common random numbers: game ``i`` uses seed ``seed * SEED_STRIDE + i``, so every
+``w`` sees the same streams. Identical weights are cached.
 """
 
 from __future__ import annotations
@@ -36,6 +34,7 @@ WEIGHT_BOUNDS = (-5.0, 5.0)
 LO, HI = WEIGHT_BOUNDS
 FITNESS_DEPTH = 2
 CACHE_DECIMALS = 6
+SEED_STRIDE = 10_000  # spaces run seeds so different seeds never share a game
 
 
 def clip_weights(w: np.ndarray | list[float]) -> np.ndarray:
@@ -46,6 +45,11 @@ def clip_weights(w: np.ndarray | list[float]) -> np.ndarray:
 def random_weights(rng: random.Random, n: int = NUM_FEATURES) -> np.ndarray:
     """Uniformly random weight vector in ``[-5, 5]^n`` from a seeded RNG."""
     return np.asarray([rng.uniform(LO, HI) for _ in range(n)], dtype=np.float32)
+
+
+def game_seed(seed: int, i: int) -> int:
+    """Seed for game ``i`` of a run with base ``seed`` (spaced so runs never overlap)."""
+    return seed * SEED_STRIDE + i
 
 
 class FitnessEvaluator:
@@ -68,6 +72,10 @@ class FitnessEvaluator:
         self.misses = 0
         self.hits = 0
         self._cache: dict[tuple[float, ...], float] = {}
+
+    def game_seeds(self) -> list[int]:
+        """Game seeds this evaluator will use, for cross-run disjointness checks."""
+        return [game_seed(self.seed, i) for i in range(self.budget_games)]
 
     def _key(self, w: np.ndarray) -> tuple[float, ...]:
         return tuple(round(float(x), CACHE_DECIMALS) for x in w)
@@ -100,8 +108,8 @@ class FitnessEvaluator:
         win_total = 0.0
         margin_total = 0.0
         for i in range(self.budget_games):
-            game_seed = self.seed + i
-            seeder = random.Random(game_seed)
+            gs = game_seed(self.seed, i)
+            seeder = random.Random(gs)
             s0 = seeder.getrandbits(32)
             s1 = seeder.getrandbits(32)
             greedy = i < greedy_split
@@ -114,7 +122,7 @@ class FitnessEvaluator:
                 p0 = self._opponent(s0, greedy)
                 p1 = SearchPlayer(weights=w, max_depth=FITNESS_DEPTH, seed=s1)
                 seat = 1
-            row = play_game(p0, p1, m, n, game_seed, time_limit=None)
+            row = play_game(p0, p1, m, n, gs, time_limit=None)
             winner = int(row["winner"])
             score = (int(row["score0"]), int(row["score1"]))
             margin = score[seat] - score[1 - seat]
