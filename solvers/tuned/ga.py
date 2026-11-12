@@ -1,11 +1,11 @@
 """Solver 6: real-coded genetic algorithm on solver-3's weight vector.
 
-Population of 20 uniform ``[-5, 5]^12`` individuals; tournament selection
-(``q = 3``), BLX-0.5 crossover (rate 0.9), Gaussian mutation (sigma 0.3 per gene,
-rate 1/12), elitism of 2, generational replacement.
+Population of 20: ``DEFAULT_WEIGHTS`` + 19 uniform ``[-5, 5]^12`` individuals;
+tournament selection (``q = 3``), BLX-0.5 crossover (rate 0.9), Gaussian mutation
+(sigma 0.3 per gene, rate 1/12), elitism of 2, generational replacement.
 
-The budget is a number of fitness evaluations: 20 for the initial population plus
-18 per generation, so a budget of ``B`` runs ``(B - 20) // 18`` generations.
+Budget is fitness evaluations: 20 initial + 18 per generation, so ``B`` runs
+``(B - 20) // 18`` generations.
 """
 
 from __future__ import annotations
@@ -15,6 +15,7 @@ import random
 
 import numpy as np
 
+from engine.board import Board
 from solvers.search import DEFAULT_WEIGHTS
 from solvers.tuned.fitness import (
     DEFAULT_BOARD,
@@ -57,11 +58,12 @@ def _mutate(child: np.ndarray, rng: random.Random) -> np.ndarray:
 
 
 def genetic_algorithm(evaluator: FitnessEvaluator, budget: int, seed: int) -> tuple[np.ndarray, Trace]:
+    """Maximise fitness with the GA; return ``(best_w, trace)``."""
     if budget < POP_SIZE:
         raise ValueError(f"GA needs budget >= pop size {POP_SIZE}, got {budget}")
     rng = random.Random(seed)
     n = len(DEFAULT_WEIGHTS)
-    pop = [random_weights(rng, n) for _ in range(POP_SIZE)]
+    pop = [np.asarray(DEFAULT_WEIGHTS, dtype=np.float32).copy()] + [random_weights(rng, n) for _ in range(POP_SIZE - 1)]
     fits: list[float] = []
     best: np.ndarray | None = None
     best_f = -math.inf
@@ -93,7 +95,12 @@ def genetic_algorithm(evaluator: FitnessEvaluator, budget: int, seed: int) -> tu
     return best, trace
 
 
-def run_ga(budget: int, seed: int, board=DEFAULT_BOARD, budget_games: int = DEFAULT_BUDGET_GAMES) -> np.ndarray:
+def run_ga(
+    budget: int,
+    seed: int,
+    board: Board | tuple[int, int] = DEFAULT_BOARD,
+    budget_games: int = DEFAULT_BUDGET_GAMES,
+) -> np.ndarray:
     """Tune weights with the GA and return the best vector found."""
     w, _ = genetic_algorithm(FitnessEvaluator(board, budget_games, seed), budget, seed)
     return w
