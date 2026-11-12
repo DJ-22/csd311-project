@@ -10,6 +10,8 @@ The acceptance criteria from the spec:
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -32,6 +34,12 @@ def test_fitness_reproducible_for_same_seed() -> None:
     b = fitness(w, budget_games=8, seed=7, board=(2, 2))
     assert a == pytest.approx(b, abs=1e-9)
     assert -0.011 <= a <= 1.011
+
+
+def test_fitness_game_seeds_disjoint_across_seeds() -> None:
+    a = FitnessEvaluator((2, 2), budget_games=40, seed=0).game_seeds()
+    b = FitnessEvaluator((2, 2), budget_games=40, seed=1).game_seeds()
+    assert not set(a) & set(b)
 
 
 def test_fitness_evaluator_caches_identical_weights() -> None:
@@ -78,7 +86,7 @@ def test_run_returns_valid_weights(opt: str) -> None:
     assert float(w.max()) <= WEIGHT_BOUNDS[1] + 1e-6
 
 
-def test_save_load_and_tuned_player(tmp_path) -> None:
+def test_save_load_and_tuned_player(tmp_path: Path) -> None:
     w = [0.0] * NUM_FEATURES
     w[3] = 1.0
     path = save_best_w("hc", w, data_dir=tmp_path, board="3x3")
@@ -92,7 +100,7 @@ def test_save_load_and_tuned_player(tmp_path) -> None:
     assert tuned_player("hc", data_dir=tmp_path).name == "search-hc"
 
 
-def test_tuned_player_missing_raises(tmp_path) -> None:
+def test_tuned_player_missing_raises(tmp_path: Path) -> None:
     with pytest.raises(FileNotFoundError):
         tuned_player("search-ga", data_dir=tmp_path)
 
@@ -102,10 +110,10 @@ def test_tuned_player_unknown_name() -> None:
         tuned_player("search-bogus")
 
 
-def test_tuned_players_registered_in_cli(monkeypatch) -> None:
+def test_tuned_players_registered_in_cli(monkeypatch: pytest.MonkeyPatch) -> None:
     from harness import cli
 
-    def fake_tuned(name: str, seed: int = 0):
+    def fake_tuned(name: str, seed: int = 0) -> SearchPlayer:
         return SearchPlayer(seed=seed)
 
     monkeypatch.setattr(cli, "tuned_player", fake_tuned)
