@@ -4,10 +4,17 @@ Positions come from random self-play games between a mix of players (random,
 greedy, depth-2 search), sampled at every stage of each game. Each game picks
 its first player at random so ``to_move`` and ``first_player`` both vary.
 
-Deduplication is by ``(canonical(edges), mover_is_first)``: ``V`` depends on
-``edges`` only, but feature 10 of ``phi`` also depends on whether the player to
-move is the game's first player. A position is kept in the **first game it
-appears in**, so every unique position belongs to exactly one game.
+Deduplication is by ``canonical(edges)`` only. Labels (exact ``V`` and the MC
+estimate) depend on ``edges`` alone, so the same board with the other value of
+``mover_is_first`` would be a near-duplicate with an identical label; keeping
+it could put one board in two splits. A board is kept in the **first game it
+appears in** (with that game's ``to_move`` / ``first_player``), so every board,
+up to symmetry, belongs to exactly one game and one split.
+
+Known limitation: the first player is drawn at random per game, but
+``SearchPlayer`` assumes seat 0 moved first (``mover_is_first = to_move == 0``),
+so in games where seat 1 starts the depth-2 search player has the long-chain
+parity backwards. This only changes which positions get sampled, not their labels.
 
 The train / validation / test split (70 / 15 / 15) is drawn **per game**, not
 per position, so no game contributes to two splits (no leakage of near-identical
@@ -95,7 +102,7 @@ def sample_positions(
     rng = random.Random(seed)
     kinds = [k for k, _ in PLAYER_MIX]
     weights = [w for _, w in PLAYER_MIX]
-    seen: set[tuple[int, bool]] = set()
+    seen: set[int] = set()
     rows: list[tuple[int, int, int, int, int]] = []  # edges, to_move, first_player, game, split
     game = 0
     stall = 0
@@ -109,8 +116,7 @@ def sample_positions(
         state = new_game(board.m, board.n, to_move=first)
         added = 0
         while not is_terminal(state) and len(rows) < n_positions:
-            mif = state.to_move == first
-            key = (canonical(state.edges, board.m, board.n), mif)
+            key = canonical(state.edges, board.m, board.n)
             if key not in seen:
                 seen.add(key)
                 rows.append((state.edges, state.to_move, first, game, split))
