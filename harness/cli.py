@@ -37,20 +37,36 @@ PLAYERS: dict[str, Callable[[int], Player]] = {
 }
 
 
+# Solver 7 players take a trained model: ``learned:<model_path>`` or ``search-learned:<model_path>``.
+MODEL_PLAYERS: tuple[str, ...] = ("learned", "search-learned")
+
+
 def make_player(name: str, seed: int) -> Player:
-    """Build a registered player by name."""
+    """Build a registered player by name, or a solver 7 player from ``<kind>:<model_path>``."""
+    kind, sep, path = name.partition(":")
+    if sep and kind in MODEL_PLAYERS:
+        # Imported here so that other players do not pay for importing torch / sklearn.
+        from solvers.supervised.player import LearnedPlayer, search_learned
+
+        return LearnedPlayer(path, seed=seed) if kind == "learned" else search_learned(path, seed=seed)
     try:
         return PLAYERS[name](seed)
     except KeyError:
-        raise ValueError(f"unknown player {name!r}; choose from {sorted(PLAYERS)}") from None
+        raise ValueError(
+            f"unknown player {name!r}; choose from {sorted(PLAYERS)} or learned:<model_path>, "
+            "search-learned:<model_path>"
+        ) from None
 
 
 def _tournament(args: argparse.Namespace) -> None:
     board = parse_board(args.board)
     names = [p.strip() for p in args.players.split(",") if p.strip()]
+    labels: dict[str, str] = {}  # CLI name -> player name written to the CSV
     for name in names:
-        if name not in PLAYERS:
-            raise SystemExit(f"unknown player {name!r}; choose from {sorted(PLAYERS)}")
+        try:
+            labels[name] = make_player(name, 0).name
+        except (ValueError, OSError) as exc:
+            raise SystemExit(str(exc)) from None
     if len(names) < 2:
         raise SystemExit("need at least two players")
     rows = round_robin(names, make_player, board.m, board.n, args.games, args.seed, args.time_limit)
@@ -64,7 +80,7 @@ def _tournament(args: argparse.Namespace) -> None:
     print(header)
     print("-" * len(header))
     for name in names:
-        s = summarise(rows, name)
+        s = summarise(rows, labels[name])
         ci = f"{s.win_rate:.3f} [{s.ci_low:.3f}, {s.ci_high:.3f}]"
         print(
             f"{s.player:<10}{s.games:>7}{s.wins:>6}{s.draws:>5}{s.losses:>6}  {ci:<24}"
@@ -79,7 +95,11 @@ def main(argv: Sequence[str] | None = None) -> None:
     t = sub.add_parser("tournament", help="round-robin tournament; writes a CSV to experiments/results/")
     t.add_argument("--board", required=True, help="board size in boxes, e.g. 3x3")
     t.add_argument("--games", type=int, required=True, help="games per pair of players")
-    t.add_argument("--players", required=True, help=f"comma-separated, from {sorted(PLAYERS)}")
+    t.add_argument(
+        "--players",
+        required=True,
+        help=f"comma-separated, from {sorted(PLAYERS)}, or learned:<model_path> / search-learned:<model_path>",
+    )
     t.add_argument("--seed", type=int, default=0)
     t.add_argument("--time-limit", type=float, default=DEFAULT_TIME_LIMIT, help="seconds per move")
     t.add_argument("--name", default=None, help="CSV file name prefix")
