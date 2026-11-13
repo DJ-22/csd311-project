@@ -53,7 +53,7 @@ python -m harness.cli tournament --board 2x3 --games 50 --seed 0 \
 `data/` is git-ignored; regenerate it before using solvers 6 and 7.
 
 ```bash
-# Solver 6: tuned weights in data/tuned/ (about 1 CPU-hour with the defaults)
+# Solver 6: tuned weights in data/tuned/ (about 2 hours with the defaults)
 python -m experiments.e3_tune --board 3x3 --budget 600 --seeds 3 --games 400 --seed 0
 
 # Solver 7: datasets, then a 2x3 model for the learned players

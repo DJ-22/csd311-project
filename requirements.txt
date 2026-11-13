@@ -1,6 +1,6 @@
 numpy>=1.26
 pytest>=8.0
-scikit-learn>=1.4
+scikit-learn>=1.4,<1.11  # 1.11 removes SVC(probability=True), used by solver 7
 torch>=2.2
 matplotlib>=3.8
 # optional: Prolog backend of solver 4 (rules-prolog); also needs SWI-Prolog on PATH
