@@ -63,11 +63,16 @@ def test_no_game_in_two_splits(data_2x2: dict[str, np.ndarray]) -> None:
 
 
 def test_positions_are_unique_up_to_symmetry(data_2x2: dict[str, np.ndarray]) -> None:
-    keys = [
-        (canonical(int(e), 2, 2), int(t) == int(f))
-        for e, t, f in zip(data_2x2["edges"], data_2x2["to_move"], data_2x2["first_player"])
-    ]
+    keys = [canonical(int(e), 2, 2) for e in data_2x2["edges"]]
     assert len(keys) == len(set(keys))
+
+
+def test_no_board_in_two_splits(data_2x2: dict[str, np.ndarray]) -> None:
+    """Same board up to symmetry never appears in two splits (labels depend on edges only)."""
+    split_of: dict[int, int] = {}
+    for e, s in zip(data_2x2["edges"], data_2x2["split"]):
+        key = canonical(int(e), 2, 2)
+        assert split_of.setdefault(key, int(s)) == int(s)
 
 
 def test_exact_labels_and_targets(data_2x2: dict[str, np.ndarray]) -> None:
