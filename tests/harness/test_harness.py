@@ -1,4 +1,5 @@
 import csv
+from pathlib import Path
 
 import pytest
 
@@ -133,3 +134,21 @@ def test_cli_tournament_writes_csv(tmp_path, monkeypatch, capsys) -> None:
 def test_unknown_player() -> None:
     with pytest.raises(ValueError):
         make_player("nope", 0)
+
+
+def test_round_robin_parallel_matches_serial() -> None:
+    # Untimed players: parallel workers must reproduce the serial games exactly (seeds and order).
+    names = ["random", "greedy", "exact"]
+    serial = round_robin(names, make_player, 2, 2, games=4, seed=5, time_limit=None)
+    parallel = round_robin(names, make_player, 2, 2, games=4, seed=5, time_limit=None, workers=2)
+    keys = ("p0", "p1", "seed", "score0", "score1", "winner", "moves")
+    assert [tuple(r[k] for k in keys) for r in parallel] == [tuple(r[k] for k in keys) for r in serial]
+
+
+def test_cli_workers_flag(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    import harness.tournament as tournament
+
+    monkeypatch.setattr(tournament, "RESULTS_DIR", tmp_path)
+    monkeypatch.setattr(tournament.write_csv, "__defaults__", (tmp_path,))
+    main(["tournament", "--board", "2x2", "--games", "2", "--players", "random,greedy", "--workers", "2"])
+    assert len(list(tmp_path.glob("tournament_2x2_*.csv"))) == 1

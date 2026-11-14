@@ -116,6 +116,73 @@ def play_game(
     }
 
 
+# (seat-0 name, seat-1 name, seat-0 player seed, seat-1 player seed, game seed)
+GameJob = tuple[str, str, int, int, int]
+
+
+def _match_jobs(a: str, b: str, games: int, seed: int) -> list[GameJob]:
+    """The games of an ``a`` vs ``b`` match: seat order and seeds, as :func:`match` plays them."""
+    jobs: list[GameJob] = []
+    for i in range(games):
+        game_seed = seed + i
+        seeder = random.Random(game_seed)
+        seat0_seed, seat1_seed = seeder.getrandbits(32), seeder.getrandbits(32)
+        first, second = (a, b) if i % 2 == 0 else (b, a)
+        jobs.append((first, second, seat0_seed, seat1_seed, game_seed))
+    return jobs
+
+
+def _play_job(factory: PlayerFactory, m: int, n: int, time_limit: float | None, job: GameJob) -> dict[str, Any]:
+    first, second, seat0_seed, seat1_seed, game_seed = job
+    return play_game(factory(first, seat0_seed), factory(second, seat1_seed), m, n, game_seed, time_limit)
+
+
+def _worker_init() -> None:
+    """One thread per worker process, so parallel games do not oversubscribe the CPU (torch, BLAS)."""
+    import os
+
+    for var in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS"):
+        os.environ[var] = "1"
+
+
+def _run_jobs(
+    jobs: Sequence[GameJob],
+    factory: PlayerFactory,
+    m: int,
+    n: int,
+    time_limit: float | None,
+    workers: int,
+    progress: bool,
+) -> list[dict[str, Any]]:
+    """Play ``jobs`` in order (``workers == 1``) or across processes; rows keep the job order.
+
+    With ``workers > 1`` the factory must be picklable (a module-level function such
+    as ``harness.cli.make_player``). Every game still gets the same seeds, so only
+    time-limited players can play differently (they get whatever CPU their process gets).
+    """
+    total = len(jobs)
+    step = max(1, total // 20)
+    rows: list[dict[str, Any]] = []
+
+    def report(done: int) -> None:
+        if progress and (done % step == 0 or done == total):
+            print(f"  {done}/{total} games", flush=True)
+
+    if workers <= 1:
+        for job in jobs:
+            rows.append(_play_job(factory, m, n, time_limit, job))
+            report(len(rows))
+        return rows
+    from concurrent.futures import ProcessPoolExecutor
+    from functools import partial
+
+    with ProcessPoolExecutor(max_workers=workers, initializer=_worker_init) as pool:
+        for row in pool.map(partial(_play_job, factory, m, n, time_limit), jobs, chunksize=1):
+            rows.append(row)
+            report(len(rows))
+    return rows
+
+
 def match(
     a: str,
     b: str,
@@ -125,20 +192,14 @@ def match(
     games: int,
     seed: int,
     time_limit: float | None = DEFAULT_TIME_LIMIT,
+    workers: int = 1,
 ) -> list[dict[str, Any]]:
     """``games`` games between ``a`` and ``b``; ``a`` moves first in even-numbered games.
 
-    Game ``i`` uses seed ``seed + i``.
+    Game ``i`` uses seed ``seed + i``. ``workers > 1`` plays games in parallel
+    processes (see :func:`_run_jobs`).
     """
-    rows = []
-    for i in range(games):
-        game_seed = seed + i
-        seeder = random.Random(game_seed)
-        seat0_seed, seat1_seed = seeder.getrandbits(32), seeder.getrandbits(32)
-        first, second = (a, b) if i % 2 == 0 else (b, a)
-        p0, p1 = factory(first, seat0_seed), factory(second, seat1_seed)
-        rows.append(play_game(p0, p1, m, n, game_seed, time_limit))
-    return rows
+    return _run_jobs(_match_jobs(a, b, games, seed), factory, m, n, time_limit, workers, False)
 
 
 def round_robin(
@@ -149,18 +210,23 @@ def round_robin(
     games: int,
     seed: int,
     time_limit: float | None = DEFAULT_TIME_LIMIT,
+    workers: int = 1,
+    progress: bool = False,
 ) -> list[dict[str, Any]]:
     """Every pair of distinct players plays a ``games``-game match.
 
     Pair ``j`` (in ``itertools.combinations`` order) uses seeds starting at
-    ``seed + j * games``, so no two games share a seed.
+    ``seed + j * games``, so no two games share a seed. ``workers > 1`` plays
+    games in parallel processes with the same seeds and row order.
     """
     if len(set(names)) != len(names):
         raise ValueError(f"duplicate player names in {list(names)}")
-    rows: list[dict[str, Any]] = []
-    for j, (a, b) in enumerate(combinations(names, 2)):
-        rows.extend(match(a, b, factory, m, n, games, seed + j * games, time_limit))
-    return rows
+    jobs = [
+        job
+        for j, (a, b) in enumerate(combinations(names, 2))
+        for job in _match_jobs(a, b, games, seed + j * games)
+    ]
+    return _run_jobs(jobs, factory, m, n, time_limit, workers, progress)
 
 
 def write_csv(rows: Sequence[dict[str, Any]], name: str, results_dir: Path = RESULTS_DIR) -> Path:

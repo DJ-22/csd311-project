@@ -69,12 +69,17 @@ def _tournament(args: argparse.Namespace) -> None:
             raise SystemExit(str(exc)) from None
     if len(names) < 2:
         raise SystemExit("need at least two players")
-    rows = round_robin(names, make_player, board.m, board.n, args.games, args.seed, args.time_limit)
+    if args.workers < 1:
+        raise SystemExit("--workers must be >= 1")
+    rows = round_robin(
+        names, make_player, board.m, board.n, args.games, args.seed, args.time_limit,
+        workers=args.workers, progress=args.workers > 1,
+    )
     path = write_csv(rows, args.name or f"tournament_{board.m}x{board.n}")
 
     print(
         f"board={board.m}x{board.n}  seed={args.seed}  games per pair={args.games}  "
-        f"total games={len(rows)}  time limit={args.time_limit}s"
+        f"total games={len(rows)}  time limit={args.time_limit}s  workers={args.workers}"
     )
     header = f"{'player':<10}{'games':>7}{'W':>6}{'D':>5}{'L':>6}  {'win rate [95% CI]':<24}{'margin':>8}{'ms/move':>10}{'nodes/move':>12}{'b*':>7}"
     print(header)
@@ -103,6 +108,10 @@ def main(argv: Sequence[str] | None = None) -> None:
     t.add_argument("--seed", type=int, default=0)
     t.add_argument("--time-limit", type=float, default=DEFAULT_TIME_LIMIT, help="seconds per move")
     t.add_argument("--name", default=None, help="CSV file name prefix")
+    t.add_argument(
+        "--workers", type=int, default=1,
+        help="parallel game processes (same seeds and row order); keep <= physical performance cores",
+    )
     t.set_defaults(func=_tournament)
     args = parser.parse_args(argv)
     args.func(args)

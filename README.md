@@ -31,6 +31,8 @@ python -m harness.cli tournament --board 3x3 --games 100 --seed 0 --time-limit 1
 
 Results are written to `experiments/results/<name>_<timestamp>.csv` (`--name` sets the prefix).
 
+`--workers N` plays games in N parallel processes with the same seeds and row order. Keep N at or below the number of physical (performance) cores: time-limited players search less when they share a core.
+
 | Player | Solver |
 |---|---|
 | `random`, `greedy` | 1: baselines |
@@ -62,4 +64,17 @@ python -m solvers.supervised.models --data data/sup_exact_2x3_n50000_s0.npz --mo
     --task reg --seed 0 --params '{"hidden": [64, 64]}' --out data/models/e5_mlp-64x64_both_reg_2x3_s0.pkl
 ```
 
-For 3×3, build the dataset with `--source mc --rollouts 200 --workers 4` and train models with `python -m experiments.e4_learned_evaluator --data data/sup_mc_3x3_n50000_s0.npz --seed 0 --save-models`.
+For 3×3, build the dataset with `--source mc --rollouts 200 --workers 8` and train models with `python -m experiments.e4_learned_evaluator --data data/sup_mc_3x3_n50000_s0.npz --seed 0 --save-models`.
+
+## Report experiments
+
+Each script takes `--seed` and writes timestamped files to `experiments/results/`.
+
+| Experiment | Command |
+|---|---|
+| E1 overall strength | `python -m harness.cli tournament --board 3x3 --games 50 --seed 0 --workers 8 --name e1 --players random,greedy,search,rules,mcts,search-tabu,search-learned:data/models/e4_mlp-64x64_both_reg_3x3_s0.pkl` |
+| E2 search efficiency | `python -m experiments.e2_search_efficiency --seed 0` |
+| E3 optimiser comparison | `python -m experiments.e3_tune --board 3x3 --budget 600 --seeds 3 --games 400 --seed 0` |
+| E4 learned evaluator | `python -m experiments.e4_learned_evaluator --data data/sup_exact_2x3_n50000_s0.npz --seed 0` |
+| E5 deductive vs inductive | `python -m experiments.e5_deductive_vs_inductive --board 2x3 --model <model.pkl> --games 200 --seed 0` |
+| E6 MCTS scaling | `python -m experiments.e6_mcts_scaling --board 3x3 --games 100 --seed 0` |
