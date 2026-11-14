@@ -22,6 +22,38 @@ python -m pytest -q
 
 The Prolog tests skip when SWI-Prolog is not installed.
 
+## Play against the solvers
+
+```bash
+python -m app
+```
+
+A window opens with a menu: play against any solver yourself, or pick two solvers and watch them play (pause, step, speed). Choose the board (2×2 up to 5×5), who moves first and the thinking time per move. Click a line to draw it. Keys: Esc menu, R restart, Space pause and → step (bot vs bot).
+
+Which bots a board offers:
+
+- **On the boards a bot was built for, it is always offered.** For the bots optimised per board (tuned weights, MCTS settings, a learned model, the exact solve) these are the boards they were optimised on. For the others they are the experiment boards 2×2, 2×3 and 3×3.
+- **On any other board, a bot is offered only if it beat Greedy in at least 80% of 40 test games there** (1 s per move, seed 0).
+
+A board is listed only if it offers at least one bot. Where a bot was tested on a board, its description in the menu shows the result. Results of `python -m experiments.optimize_boards` on the reference machine (40 games against Greedy, 1 s per move, seed 0):
+
+| Bot | 3×4 | 4×4 | 5×5 |
+|---|---|---|---|
+| Flat Monte Carlo \* | 98% | 96% | 100% |
+| Heuristic search | 91% | 91% | 88% |
+| Search + learned \* | 88% | 86% | 73% |
+| Rule-based | 74% (not offered) | 90% | 95% |
+| Search tuned by a GA \*† | 68% | 74% | 95% |
+| Search tuned by tabu search \*† | 78% | 76% | 85% |
+| Search tuned by hill climbing \*† | 73% | 65% | 85% |
+| Search tuned by simulated annealing \*† | 86% | 71% | 83% |
+| MCTS (UCT) \* | 76% | 53% | 8% |
+| Learned, one move ahead \* | 46% | 35% | 23% |
+
+\* Optimised for each of these boards, so it is offered whatever its score. † Plays 2 moves ahead, the depth its weights were tuned at. With 1 s per move it searches deeper, and these weights then give boxes away (5×5: 3–48% against Greedy). Exact is offered up to 3×3, where it beat Greedy in 98% of games; its first move there takes about 50 s while it solves the board.
+
+Needs `pygame-ce` (in `requirements.txt`). The tuned and learned bots appear only after their data is generated (see "Generate data").
+
 ## Run a tournament
 
 ```bash
@@ -65,6 +97,12 @@ python -m solvers.supervised.models --data data/sup_exact_2x3_n50000_s0.npz --mo
 ```
 
 For 3×3, build the dataset with `--source mc --rollouts 200 --workers 8` and train models with `python -m experiments.e4_learned_evaluator --data data/sup_mc_3x3_n50000_s0.npz --seed 0 --save-models`.
+
+For the app's larger boards (3×4, 4×4, 5×5), one resumable command tunes the solver 6 weights and the MCTS settings, builds a learned model for each board and tests every bot against Greedy. It took about 5 hours on the reference machine (20 cores); press Ctrl+C to stop and rerun the same command to resume:
+
+```bash
+python -m experiments.optimize_boards           # --list shows the jobs and which are done
+```
 
 ## Report experiments
 
