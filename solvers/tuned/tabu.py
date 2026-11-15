@@ -1,8 +1,9 @@
 """Solver 6: tabu search on solver-3's weight vector.
 
 Neighbourhood of ``+/- delta`` on each of the 12 weights (up to 24 neighbours);
-a random sample of 6 is evaluated each step. A move ``(index, sign)`` stays tabu
-for 7 steps; a tabu move is allowed (aspiration) when it beats the best-so-far.
+a random sample of 6 is evaluated each step. After a move ``(index, sign)`` its
+reverse ``(index, -sign)`` stays tabu for 7 steps, so the search cannot step
+straight back; a tabu move is allowed (aspiration) when it beats the best-so-far.
 """
 
 from __future__ import annotations
@@ -68,7 +69,8 @@ def tabu_search(evaluator: FitnessEvaluator, budget: int, seed: int) -> tuple[np
         current, current_f = w_next, f_next
         if current_f > best_f:
             best, best_f = current.copy(), current_f
-        tabu.append(move)
+        i, sign = move
+        tabu.append((i, -sign))  # forbid undoing this step
         trace.append((evaluator.evals, current_f, best_f))
     return best, trace
 

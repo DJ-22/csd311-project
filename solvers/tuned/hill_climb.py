@@ -51,6 +51,7 @@ def hill_climb(evaluator: FitnessEvaluator, budget: int, seed: int) -> tuple[np.
             cf = evaluator.evaluate(candidate)
             if cf > current_f:
                 current, current_f = candidate, cf
+                stuck = 0  # the count is of consecutive non-improving evaluations
             else:
                 stuck += 1
         if current_f > best_f:
