@@ -69,11 +69,14 @@ BOT_KINDS: tuple[tuple[str, str, str], ...] = (
 DEFAULT_BOT = "search"
 
 _MODEL_BOARD = re.compile(r"_(\d+)x(\d+)_")
+# The learned bots use this model type only: E4 --save-models also saves kNN, SVM, tree and other
+# models, which are far too slow (or too weak) to play inside the app.
+APP_MODEL = "mlp-64x64_both_reg"
 
 
 # ----- where per-board data lives (all under data/, git-ignored) ------------------------
 def tuned_dir(m: int, n: int, data_root: Path = DATA_DIR) -> Path:
-    """Tuned weights for a board: E3's 3x3 weights in data/tuned/, others in data/tuned/<m>x<n>/."""
+    """Tuned weights for a board under ``data_root`` (the layout of ``solvers.tuned.weights_dir``)."""
     return data_root / "tuned" if (m, n) == (3, 3) else data_root / "tuned" / f"{m}x{n}"
 
 
@@ -107,13 +110,13 @@ def _model_label(path: Path) -> str:
 
 
 def model_files(m: int, n: int, model_dir: Path) -> list[Path]:
-    """Saved solver 7 models trained on an ``m x n`` board."""
+    """Saved ``APP_MODEL`` solver 7 models trained on an ``m x n`` board."""
     if not model_dir.is_dir():
         return []
     out = []
     for path in sorted(model_dir.glob("*.pkl")):
         hit = _MODEL_BOARD.search(path.name)
-        if hit and (int(hit.group(1)), int(hit.group(2))) == (m, n):
+        if hit and APP_MODEL in path.name and (int(hit.group(1)), int(hit.group(2))) == (m, n):
             out.append(path)
     return out
 
