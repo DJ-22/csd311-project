@@ -241,3 +241,14 @@ data/models/*
 !data/models/e4_mlp-64x64_both_reg_3x3_s0.pkl
 !data/models/e5_mlp-64x64_both_reg_2x3_s0.pkl
 !data/models/mlp-64x64_both_reg_*_s0.pkl
+
+# LaTeX build files (the report sources are tracked; the final PDF is Report.pdf in the root)
+report/*.aux
+report/*.bbl
+report/*.blg
+report/*.out
+report/*.toc
+report/*.fls
+report/*.fdb_latexmk
+report/*.synctex.gz
+report/main.pdf
