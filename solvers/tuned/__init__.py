@@ -50,6 +50,7 @@ __all__ = [
     "WEIGHT_BOUNDS",
     "DEFAULT_BOARD",
     "DEFAULT_BUDGET_GAMES",
+    "weights_dir",
 ]
 
 OPTIMISERS: tuple[str, ...] = ("ga", "hc", "sa", "tabu")
@@ -59,6 +60,11 @@ PLAYER_NAMES: dict[str, str] = {
     "sa": "search-sa",
     "tabu": "search-tabu",
 }
+
+
+def weights_dir(m: int, n: int) -> Path:
+    """Where a board's tuned weights live: ``data/tuned/`` for 3x3 (E3), ``data/tuned/<m>x<n>/`` otherwise."""
+    return DATA_DIR if (m, n) == DEFAULT_BOARD else DATA_DIR / f"{m}x{n}"
 
 
 def save_best_w(

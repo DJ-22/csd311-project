@@ -2,9 +2,10 @@
 
 Runs each optimiser over ``--seeds`` seeds, writes a per-run trace CSV
 (``experiments/results/E3_<opt>_trace_*.csv``) and the best weight vector
-(``data/tuned/<opt>_best_w.json``), then re-evaluates the final best ``w`` of each
-optimiser against the untuned ``SearchPlayer`` at equal depth on ``--games`` fresh
-games and prints the win rate with its 95% CI.
+(``data/tuned/<opt>_best_w.json`` for 3x3, ``data/tuned/<m>x<n>/`` for other
+boards), then re-evaluates the final best ``w`` of each optimiser against the
+untuned ``SearchPlayer`` at equal depth on ``--games`` fresh games and prints
+the win rate with its 95% CI.
 
 Example::
 
@@ -22,7 +23,7 @@ from engine.board import parse_board
 from harness.metrics import summarise
 from harness.tournament import match, write_csv
 from solvers.search import DEFAULT_WEIGHTS, SearchPlayer
-from solvers.tuned import OPTIMISERS, PLAYER_NAMES, save_best_w, write_trace
+from solvers.tuned import OPTIMISERS, PLAYER_NAMES, save_best_w, weights_dir, write_trace
 from solvers.tuned.annealing import simulated_annealing
 from solvers.tuned.fitness import FitnessEvaluator
 from solvers.tuned.ga import genetic_algorithm
@@ -53,7 +54,8 @@ def _tune(args: argparse.Namespace) -> dict[str, np.ndarray]:
             candidates.append((final_best_f, s, w))
             print(f"{PLAYER_NAMES[opt]} seed={s}: best_f={final_best_f:.4f}  evals={evaluator.evals}")
         best_f, best_seed, best_w = max(candidates, key=lambda t: t[0])
-        save_best_w(opt, best_w, board=args.board_spec, seed=best_seed, budget=args.budget, fitness=best_f)
+        save_best_w(opt, best_w, data_dir=weights_dir(args.board.m, args.board.n), board=args.board_spec,
+                    seed=best_seed, budget=args.budget, fitness=best_f)
         best_per_opt[opt] = best_w
         print(f"  -> {PLAYER_NAMES[opt]} best seed={best_seed} fitness={best_f:.4f}")
     return best_per_opt
