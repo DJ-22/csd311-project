@@ -107,8 +107,9 @@ class Node:
 class MCTSPlayer(Player):
     """UCT player (``flat=False``) or flat Monte Carlo player (``flat=True``).
 
-    Defaults ``c=0.5`` and ``reward="margin"`` were chosen by tuning; ``"win"`` scores every losing (or every winning) move the same, so the
-    search stops distinguishing a 2-box loss from a 4-box loss.
+    Defaults ``c=0.5`` and ``reward="margin"`` were chosen by tuning; ``"win"``
+    scores every losing (or every winning) move the same, so the search stops
+    distinguishing a 2-box loss from a 4-box loss.
     """
 
     name = "mcts"
