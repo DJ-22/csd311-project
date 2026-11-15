@@ -6,7 +6,7 @@ One-ply lookahead with the extra-turn rule::
     score(a) = -V̂(s')      otherwise (turn passes)
 
 ``V̂`` is :meth:`LearnedModel.value`: the model's score in ``[-1, 1]`` times the
-boxes remaining, i.e. an estimate of net boxes for the player to move (CLAUDE.md §5).
+boxes remaining, i.e. an estimate of net boxes for the player to move.
 Ties are broken with the seeded ``rng``.
 
 ``lookahead > 1`` (and :func:`search_learned`) hand ``V̂`` to solver 3's

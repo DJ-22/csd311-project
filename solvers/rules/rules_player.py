@@ -67,7 +67,7 @@ class Run:
         return 2 if len(self.boxes) >= 2 else 0
 
 
-# helpers on the raw bitmask (board last, CLAUDE.md §3)
+# helpers on the raw bitmask (the Board is always the last argument)
 
 
 def _sides(edges: int, board: Board) -> list[int]:

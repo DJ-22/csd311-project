@@ -1,6 +1,6 @@
 """Solver 6 (metaheuristic-tuned players): fitness, optimisers, persistence.
 
-The acceptance criteria from the spec:
+What is checked:
 
 * the fitness of ``DEFAULT_WEIGHTS`` is reproducible for a fixed seed;
 * every optimiser's best-so-far trace is monotone non-decreasing and stays within

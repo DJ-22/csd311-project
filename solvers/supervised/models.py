@@ -12,7 +12,7 @@ how good the position is for the player to move:
   perceptron, which has no probability).
 
 :meth:`LearnedModel.value` turns that into net boxes, ``score * boxes_remaining``,
-the quantity of the value convention (CLAUDE.md §5), so a learned model can be
+the quantity the searchers use (net boxes still to be gained by the player to move), so a learned model can be
 used by the one-ply player and as solver 3's evaluator.
 
 From-scratch models (numpy, matching the update rules of 17.pdf):

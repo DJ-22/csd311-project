@@ -1,7 +1,7 @@
 """Solver 3: heuristic search player.
 
-Depth-limited negamax alpha-beta on the raw edge bitmask with the extra-turn rule
-(CLAUDE.md §5). For a move completing ``k`` boxes into ``child``::
+Depth-limited negamax alpha-beta on the raw edge bitmask with the extra-turn rule.
+Values are net boxes still to be gained by the player to move. For a move completing ``k`` boxes into ``child``::
 
     value = k + V(child)    if k > 0   (same player moves again, no sign flip)
     value = -V(child)       if k == 0  (turn passes, sign flips)
@@ -37,7 +37,7 @@ from solvers.baselines import capture_run
 
 Evaluator = Callable[[int, Board, bool], float]
 
-# One weight per feature of CLAUDE.md §7, in the same order.
+# One weight per feature of features.phi, in the same order.
 DEFAULT_WEIGHTS: tuple[float, ...] = (
     0.0,  # 0 boxes with 0 sides: neutral, says nothing about who profits
     0.0,  # 1 boxes with 1 side: neutral
