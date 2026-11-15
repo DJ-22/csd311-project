@@ -19,7 +19,7 @@ sampled from seeded Greedy self-play (stopped at a random ply, at least
 
 ``nodes`` counts every node of every iteration, quiescence nodes included, as the
 harness does, and ``b*`` is computed per position from ``nodes`` and the depth
-reached and then averaged (CLAUDE.md §10). Wall-clock columns depend on machine
+reached and then averaged (never from averaged nodes and depths). Wall-clock columns depend on machine
 load; nodes and depth are the primary metrics.
 
 Output: ``results/e2_exact_<timestamp>.csv`` and ``results/e2_search_<timestamp>.csv``

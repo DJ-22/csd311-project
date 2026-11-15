@@ -6,14 +6,14 @@ rollouts for flat MC) plays ``--games`` games against ``--opponent`` with the
 shared harness, seats alternating. Every (variant, budget) uses the same game
 seeds (common random numbers), so differences come from the player, not the draw.
 
-Variants (the spec's three comparisons):
+Variants:
 
 * ``uct``         UCT with Greedy rollouts (the tuned default, eps = 0.1)
 * ``uct-random``  UCT with uniformly random rollouts
 * ``flat``        flat Monte Carlo with Greedy rollouts
 
-The budget is iterations per move, as the spec states for E6 ("win rate vs
-iterations"); the mean seconds per move is recorded too, so budgets can also be
+The budget is iterations per move (E6 measures win rate against iterations);
+the mean seconds per move is recorded too, so budgets can also be
 read as wall-clock cost.
 
 Output: the harness CSV ``results/e6_<board>_<timestamp>.csv`` (one row per game;
@@ -137,7 +137,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--board", default="3x3")
     ap.add_argument("--iterations", default="100,300,1000,3000,10000",
-                    help="comma-separated budgets per move (the spec's range goes to 50000)")
+                    help="comma-separated budgets per move")
     ap.add_argument("--variants", default=",".join(VARIANTS), help=f"from {sorted(VARIANTS)}")
     ap.add_argument("--opponent", default="greedy", help="any harness player name")
     ap.add_argument("--games", type=int, default=100, help="games per (variant, budget)")
