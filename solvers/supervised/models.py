@@ -12,8 +12,9 @@ how good the position is for the player to move:
   perceptron, which has no probability).
 
 :meth:`LearnedModel.value` turns that into net boxes, ``score * boxes_remaining``,
-the quantity the searchers use (net boxes still to be gained by the player to move), so a learned model can be
-used by the one-ply player and as solver 3's evaluator.
+the quantity the searchers use (net boxes still to be gained by the player to
+move), so a learned model can be used by the one-ply player and as solver 3's
+evaluator.
 
 From-scratch models (numpy, matching the update rules of 17.pdf):
 
@@ -396,6 +397,8 @@ class LearnedModel:
         The harness always starts with seat 0, so ``first_player = 0`` and
         ``to_move = 0 if mover_is_first else 1``.
         """
+        if (board.m, board.n) != (self.m, self.n):
+            raise ValueError(f"model was trained on {self.m}x{self.n}, game is {board.m}x{board.n}")
         remaining = _boxes_remaining(edges, board)
         if remaining == 0:
             return 0.0
