@@ -222,3 +222,22 @@ __marimo__/
 # Generated datasets and exact tables (keep the directory)
 data/*
 !data/.gitkeep
+
+# Exception: the small files the app (python -m app) needs, so it works from a fresh clone.
+# Datasets, per-game test CSVs and pipeline bookkeeping stay ignored.
+!data/board_opt/
+data/board_opt/*
+!data/board_opt/greedy_tests.json
+!data/board_opt/mcts_*.json
+!data/board_opt/mcts-flat_*.json
+!data/tuned/
+data/tuned/*
+!data/tuned/*_best_w.json
+!data/tuned/*x*/
+data/tuned/*x*/*
+!data/tuned/*x*/*_best_w.json
+!data/models/
+data/models/*
+!data/models/e4_mlp-64x64_both_reg_3x3_s0.pkl
+!data/models/e5_mlp-64x64_both_reg_2x3_s0.pkl
+!data/models/mlp-64x64_both_reg_*_s0.pkl
