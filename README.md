@@ -52,7 +52,7 @@ A board is listed only if it offers at least one bot. Where a bot was tested on 
 
 \* Optimised for each of these boards, so it is offered whatever its score. † Plays 2 moves ahead, the depth its weights were tuned at. With 1 s per move it searches deeper, and these weights then give boxes away (5×5: 3–48% against Greedy). Exact is offered up to 3×3, where it beat Greedy in 98% of games; its first move there takes about 50 s while it solves the board.
 
-Needs `pygame-ce` (in `requirements.txt`). The tuned and learned bots appear only after their data is generated (see "Generate data").
+Needs `pygame-ce` (in `requirements.txt`). The data the bots use is included in the repo, so every board and bot above is available right after cloning.
 
 ## Run a tournament
 
@@ -72,7 +72,7 @@ Results are written to `experiments/results/<name>_<timestamp>.csv` (`--name` se
 | `search` | 3: heuristic search |
 | `rules`, `rules-prolog` | 4: rule-based, Python or Prolog backend |
 | `mcts`, `mcts-flat` | 5: UCT and flat Monte Carlo |
-| `search-ga`, `search-hc`, `search-sa`, `search-tabu` | 6: tuned search (needs `data/tuned/`, see below) |
+| `search-ga`, `search-hc`, `search-sa`, `search-tabu` | 6: tuned search (weights included in `data/tuned/`) |
 | `learned:<model.pkl>`, `search-learned:<model.pkl>` | 7: learned evaluator, one-ply or inside search (needs a model trained on the same board) |
 
 Example with every solver on 2×3:
@@ -84,7 +84,7 @@ python -m harness.cli tournament --board 2x3 --games 50 --seed 0 \
 
 ## Generate data
 
-`data/` is git-ignored; regenerate it before using solvers 6 and 7.
+Most of `data/` is git-ignored. The repo includes only the small files the app and the solver 6 and 7 players need: the tuned weights (`data/tuned/`), the trained models (`data/models/`), and the larger boards' Greedy test results and MCTS settings (`data/board_opt/`). The datasets are not included. The commands below rebuild everything; rerunning them overwrites the included files.
 
 ```bash
 # Solver 6: tuned weights in data/tuned/ (about 2 hours with the defaults)
