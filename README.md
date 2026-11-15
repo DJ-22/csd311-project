@@ -72,7 +72,7 @@ Results are written to `experiments/results/<name>_<timestamp>.csv` (`--name` se
 | `search` | 3: heuristic search |
 | `rules`, `rules-prolog` | 4: rule-based, Python or Prolog backend |
 | `mcts`, `mcts-flat` | 5: UCT and flat Monte Carlo |
-| `search-ga`, `search-hc`, `search-sa`, `search-tabu` | 6: tuned search (weights included in `data/tuned/`) |
+| `search-ga`, `search-hc`, `search-sa`, `search-tabu` | 6: tuned search with the 3×3 weights in `data/tuned/` (on other boards, use the app or `optimize_boards`) |
 | `learned:<model.pkl>`, `search-learned:<model.pkl>` | 7: learned evaluator, one-ply or inside search (needs a model trained on the same board) |
 
 Example with every solver on 2×3:
@@ -110,7 +110,7 @@ Each script takes `--seed` and writes timestamped files to `experiments/results/
 
 | Experiment | Command |
 |---|---|
-| E1 overall strength | `python -m harness.cli tournament --board 3x3 --games 50 --seed 0 --workers 8 --name e1 --players random,greedy,search,rules,mcts,search-tabu,search-learned:data/models/e4_mlp-64x64_both_reg_3x3_s0.pkl` |
+| E1 overall strength | `python -m harness.cli tournament --board 3x3 --games 50 --seed 0 --workers 8 --name e1 --players random,greedy,search,rules,mcts,mcts-flat,search-ga,search-hc,search-sa,search-tabu,learned:data/models/e4_mlp-64x64_both_reg_3x3_s0.pkl,search-learned:data/models/e4_mlp-64x64_both_reg_3x3_s0.pkl` |
 | E2 search efficiency | `python -m experiments.e2_search_efficiency --seed 0` |
 | E3 optimiser comparison | `python -m experiments.e3_tune --board 3x3 --budget 600 --seeds 3 --games 400 --seed 0` |
 | E4 learned evaluator | `python -m experiments.e4_learned_evaluator --data data/sup_exact_2x3_n50000_s0.npz --seed 0` |
