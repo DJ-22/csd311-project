@@ -14,11 +14,19 @@
 \usepackage{multirow}
 \usepackage{array}
 \usepackage{caption}
+\usepackage{placeins}
 \usepackage{enumitem}
 \usepackage{xcolor}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,calc}
 \usepackage[hidelinks]{hyperref}
+
+% Let a text page hold more floats, so tables stay close to their text.
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\bottomfraction}{0.6}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.75}
+\setcounter{totalnumber}{4}
 
 \captionsetup{font=small,labelfont=bf}
 \setlist{itemsep=2pt,topsep=4pt}
@@ -229,7 +237,7 @@ chain analysis serves both the features and the rules; and the search player acc
 either a weight vector or any evaluation function, which is how the tuned (solver 6) and
 learned (solver 7) variants reuse solver 3 without copying it.
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
   font=\scriptsize, >={Stealth[length=4pt]},
@@ -489,7 +497,7 @@ Table~\ref{tab:e1} reports a round robin of 12 players on \bd{3}{3}: 66 pairs of
 on \bd{3}{3} takes about 50\,s (in a separate 40-game test it beat Greedy 0.975), and the
 Prolog rule player is left out because it plays the same moves as the Python backend.
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{E1: \bd{3}{3} round robin, 12 players, 50 games per pair (550 per player),
 1.0\,s per move, seed 0. Win rate with 95\% Wilson interval.}
@@ -515,7 +523,7 @@ Rank & Player & Win rate [95\% CI] & Mean margin & ms/move \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.88\linewidth]{e1_strength.png}
 \caption{E1: overall win rate of each player in the \bd{3}{3} round robin with its 95\% Wilson
@@ -539,7 +547,7 @@ positions with at most 18 undrawn edges). Search remains near-perfect on all thr
 boards, while the rule player and Greedy fall to about two-thirds on late \bd{3}{3}
 positions.
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Share of optimal moves against the exact solver (60 positions per board, seed 7,
 1\,s per move).}
@@ -562,6 +570,7 @@ Random & 53.3\% & 65.0\% & 28.3\% \\
 \end{tabular}
 \end{table}
 
+\FloatBarrier
 \subsection{E2: Search efficiency}
 
 Table~\ref{tab:e2exact} gives the nodes the exact solver expands to solve the empty board.
@@ -577,7 +586,7 @@ canonical form costs more than the nodes it saves at this size. With alpha-beta 
 symmetry the solver also solves \bd{3}{3} (13.7 million nodes, 42\,s): the first player
 loses by three boxes under perfect play, $V=-3$.
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{E2, solver 2: nodes expanded to solve the empty board; every method returns the
 same value. Brute force (no memo) is run only up to 10 edges.}
@@ -603,7 +612,7 @@ plies deeper than the stripped one (10.3 against 6.0). Turning quiescence \emph{
 reduces the nodes ($0.76\times$): quiescence extends capture sequences at the leaves, so it
 costs nodes and buys evaluation accuracy rather than speed.
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{E2, solver 3: mean nodes per position at fixed depth (ratio to the full player
 in brackets), $b^*$ at depth 6, and mean depth reached in 1\,s; 40 \bd{3}{3} positions,
@@ -623,6 +632,7 @@ None of the three & 93 (0.78) & 3{,}832 (2.74) & 166{,}758 (14.88) & 6.47 & 5.97
 \end{tabular}
 \end{table}
 
+\FloatBarrier
 \subsection{E3: Optimiser comparison}
 
 Figure~\ref{fig:e3} shows the best fitness found against the number of fitness evaluations
@@ -636,7 +646,7 @@ below the other three, so it is significantly weaker. Tabu's $\pm0.5$ steps ofte
 the fitness cache answers instantly, so its runs took about 4.5 minutes against about
 13 for the GA and hill climbing, at the same budget of evaluations.
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.92\linewidth]{e3_traces.png}
 \caption{E3: best fitness so far against fitness evaluations on \bd{3}{3} (600-evaluation
@@ -645,7 +655,7 @@ the three seeds.}
 \label{fig:e3}
 \end{figure}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{E3 on \bd{3}{3}: best fitness per seed after 600 evaluations, and the best
 weights re-evaluated on 400 fresh games against untuned search, both at depth 2.}
@@ -696,6 +706,7 @@ tabu-tuned \bd{3}{3} weights gave a box away in 19 and the GA weights in 16, aga
 for untuned search. Fitness should therefore be measured at the depth used in play, and
 count features should be normalised by board size.
 
+\FloatBarrier
 \subsection{E4: Learned evaluators}
 
 The \bd{2}{3} dataset holds 32{,}622 positions from 15{,}764 games with exact labels
@@ -716,7 +727,7 @@ one winning move above another. The linear models cannot
 represent the game well: the perceptron misclassifies 15.1\% of \bd{2}{3} test positions
 ($\phi$) and 24.4\% on \bd{3}{3}, against 8.7\% and 8.5\% sign errors for the MLP.
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{E4: optimal one-ply moves on the \bd{2}{3} test set, by model and input
 (regression models, except the perceptron and naive Bayes, which are classifiers).
@@ -739,7 +750,7 @@ Decision tree & 94.1\% & 84.0\% & 93.9\% \\
 \end{tabular}
 \end{table}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{E4: test mean squared error of the regression models.}
 \label{tab:e4err}
@@ -767,7 +778,7 @@ training MSE falls to 0.002: high variance (overfitting). With L2 and early stop
 test MSE stays at 0.104--0.109 for every size. A single unit underfits in both regimes
 (training 0.171, test 0.174): high bias. The spread across seeds is at most 0.0034.
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.9\linewidth]{e4_bias_variance.png}
 \caption{E4 bias--variance: train and test MSE against hidden-layer size on \bd{2}{3}, without
@@ -776,6 +787,7 @@ seeds.}
 \label{fig:bv}
 \end{figure}
 
+\FloatBarrier
 \subsection{E5: Deductive against inductive play}
 
 E5 pits the rule player against the learned players and Greedy in round robins of 200
@@ -789,7 +801,7 @@ Inside search, however, the learned evaluation beats the rules 0.990 and Greedy 
 Deduction encodes the endgame exactly but has no lookahead; induction provides a good
 static estimate, and search turns it into strong play.
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{E5: head-to-head win rate of the row player (200 games per pair, 1.0\,s per move,
 seed 0). Models: MLP $64{\times}64$, both inputs, regression, trained on the same board.}
@@ -813,6 +825,7 @@ Board & Match & Win rate [95\% CI] \\
 \end{tabular}
 \end{table}
 
+\FloatBarrier
 \subsection{E6: Monte Carlo scaling}
 
 Figure~\ref{fig:e6} and Table~\ref{tab:e6} show the win rate against Greedy on \bd{3}{3} as the
@@ -824,7 +837,7 @@ equal time per move: UCT with random rollouts at 10{,}000 iterations (311\,ms) s
 against 0.54 for Greedy rollouts at 3{,}000 (193\,ms), and flat Monte Carlo at 1{,}000
 iterations (58\,ms) scores 0.94 against 0.24 for UCT at the same budget (53\,ms).
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.85\linewidth]{e6_mcts_scaling.png}
 \caption{E6: win rate against Greedy on \bd{3}{3} against iterations per move (log scale), 100
@@ -832,7 +845,7 @@ games per point, 95\% Wilson intervals.}
 \label{fig:e6}
 \end{figure}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{E6: win rate against Greedy and mean time per move on \bd{3}{3} (100 games per
 point, seed 0).}
@@ -860,6 +873,7 @@ same rollout error for every root move, so its ranking of moves stays correct, w
 tree compounds the error. A double-dealing rollout policy, exact endgame solving or
 solver-style backups are natural fixes \cite{browne2012survey,zhuang2015dotsboxes}.
 
+\FloatBarrier
 \subsection{Larger boards}
 \label{sec:boards}
 
@@ -875,7 +889,7 @@ below Greedy beyond \bd{3}{3}, likely because its Monte Carlo labels become nois
 positions more varied. The tuned players collapse at 1\,s per move for the reason analysed in E3, and
 recover when played at their tuning depth.
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Win rate against Greedy on larger boards (40 games per entry, 1.0\,s per move,
 seed 0). Tuned players are shown at 1\,s per move and at their tuning depth of 2.}
@@ -902,6 +916,7 @@ Tabu-tuned & 0.85 / 0.78 & 0.68 / 0.76 & 0.03 / 0.85 \\
 \end{table}
 
 % ---------------------------------------------------------------- conclusion
+\FloatBarrier
 \section{Conclusion}
 
 We implemented seven Dots and Boxes players covering exhaustive search, heuristic search,
